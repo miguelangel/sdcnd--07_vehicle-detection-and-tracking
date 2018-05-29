@@ -121,7 +121,7 @@ The rationale behind having two different sets (training and testing) it is trai
 
 At this moment we will define the parameters to be used on this pipeline.
 
-Indidual testing on the different functions, and also many many complete executions have helped me to choose this set of parameters for my pipeline. Please notice that it's been a try and error exercise.
+Indidual testing on the different functions, and also many many complete executions have helped me to choose this set of parameters for my pipeline. Please notice that it has been a try and error exercise.
 
 ```python
 # Parameters
@@ -319,7 +319,15 @@ The complete code for this step can be found in the cells 20 and 21 of this [Jup
 
 
 ### Step 10: Handle multiple detections and false positives
+The objective of this step is to reduce the number of false possitives. To do that, a heat zone is calculated based on the number of car detected by the pipeline.
 
+If the number of car detected on a specific area is greater than a threshold, then that area is considered to contain a car on it.
+
+Please notice that this is an useful technique, but it still identifies false possitives as cars.
+
+In the pipeline has been used this technique alonside to a history of heat zones that reduces significantly the number of false positives.
+
+The code can be found below, and an example of its execution too.
 
 ```python
 # This function adds "heat" to a map for a list of bounding boxes
@@ -380,10 +388,7 @@ draw_img = draw_labeled_bboxes(np.copy(img), labels)
 
 
 plt_images(draw_img, 'Car positions', heatmap, 'Heat map', cmap='hot')
-
 ```
-
-    Clipping input data to the valid range for imshow with RGB data ([0..1] for floats or [0..255] for integers).
 
 
 
@@ -391,6 +396,13 @@ plt_images(draw_img, 'Car positions', heatmap, 'Heat map', cmap='hot')
 
 
 ### Step 11: Run pipeline in a video
+This is the final step in our pipeline.
+
+In this step, we will use all the previous steps to create a pipeline that can be used on a video.
+
+The first thing I have done is to create the `ProcessImage` class. I have decided to use a class instead of a method because it would let me keep track of the previously detected heat zones and also store the pipeline parameters.
+
+Please notice that this is a very basic implementation. Nevertheless, I have added a kind of _buffer_ of boxes found by our `find_cars()` method. If the buffer contains enough evidences that a car is present in a specific zone of the image, then it is displayed a box around it.
 
 
 ```python
@@ -448,6 +460,10 @@ class ProcessImage:
         return out_img
 ```
 
+I have used MoviePy's [VideoFileClip](https://zulko.github.io/moviepy/_modules/moviepy/video/io/VideoFileClip.html) class to read the input video. Then, I have used [fl_image](https://zulko.github.io/moviepy/ref/VideoClip/VideoClip.html#moviepy.video.VideoClip.VideoClip.fl_image) to process each frame with our `ProcessImage` class. 
+
+Finally, I have written the output video usign 'https://zulko.github.io/moviepy/ref/VideoClip/VideoClip.html#moviepy.video.VideoClip.VideoClip.write_videofile' 
+
 
 ```python
 # Parameters
@@ -486,36 +502,19 @@ white_clip = clip1.fl_image(process_image)
 
 ```
 
-    [MoviePy] >>>> Building video ./project_video_solution.mp4
-    [MoviePy] Writing video ./project_video_solution.mp4
+The output video can be found [here](https://github.com/miguelangel/sdc--vehicle-detection-and-tracking/blob/master/project_video_solution.mp4).
 
+## Discussion
 
-     99%|█████████▊| 75/76 [00:34<00:00,  2.19it/s]
+This has been a really challenging project and I am quite happy with the results.
 
+ Nevertheless, there is still some room for improvements in the `ProcessImage` class:
 
-    [MoviePy] Done.
-    [MoviePy] >>>> Video ready: ./project_video_solution.mp4 
-    
-    CPU times: user 33.7 s, sys: 455 ms, total: 34.1 s
-    Wall time: 34.5 s
+- I should tune a bit more my `find_cars()` function and the _buffered heat zone mechanishim_ (I have just made up that name) to perform an even more reliable car detection.
+- 
+I will implement these changes in the future, but today is my last day to submit the project, so I have decided to leave it for the next weeks.
 
-
-
-```python
-HTML("""
-<video width="640" height="360" controls>
-  <source src="{0}">
-</video>
-""".format(output_video))
-```
-
-
-
-
-
-<video width="640" height="360" controls>
-  <source src="./project_video_solution.mp4">
-</video>
+I really hope you have enjoyed this lecture as much as I have done writting it for you.
 
 
 
